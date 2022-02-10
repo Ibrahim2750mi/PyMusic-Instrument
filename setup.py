@@ -1,5 +1,5 @@
 import pathlib
-from setuptools import setup
+from setuptools import setup, find_packages
 
 HERE = pathlib.Path(__file__).parent
 
@@ -23,7 +23,8 @@ setup(
     package_dir={
         "": "Instrument"
     },
-    packages=["Instrument"],
+    packages=find_packages(where="Instrument", exclude=("tests",)),
     install_requires=['wheel', "pyaudio", "numpy"],
     scripts=[]
 )
+
