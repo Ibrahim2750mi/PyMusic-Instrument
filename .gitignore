@@ -1,0 +1,6 @@
+# Default ignored files
+*.idea
+
+# test files
+key.py
+piano.py
