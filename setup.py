@@ -7,7 +7,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name='PyMusic-Instrument',
-    version='0.1',
+    version='0.2',
     long_description=README,
     long_description_content_type="text/markdown",
     description='A python library which can generate sounds played by instruments',
@@ -20,11 +20,10 @@ setup(
     author='Mohammad Ibrahim',
     author_email='cshore.2750mi@gmail.com',
     url="https://www.github.com/Ibrahim2750mi/PyMusic-Instrument",
-    package_dir={
-        "": "Instrument"
-    },
-    packages=find_packages(where="Instrument", exclude=("tests",)),
+
+    packages=["Instrument"],
     install_requires=['wheel', "pyaudio", "numpy"],
     scripts=[]
 )
+
 
