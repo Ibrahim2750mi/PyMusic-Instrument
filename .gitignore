@@ -4,3 +4,14 @@
 # test files
 key.py
 piano.py
+Instrument/test.py
+
+build/lib/Instrument/
+
+dist/
+
+Instrument/__pycache__/
+
+Instrument/PyMusic_Instrument.egg-info/
+
+PyMusic_Instrument.egg-info/

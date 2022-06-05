@@ -62,7 +62,7 @@ if __name__ == '__main__':
         piano.record_key(40, 0.5)
         piano.record_key(42, 0.5)
 
-    # piano.play()
+    piano.play()
     piano.clear_sample()
 
     for _ in range(8):
