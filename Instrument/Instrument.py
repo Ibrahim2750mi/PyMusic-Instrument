@@ -30,19 +30,21 @@ class Instrument:
         :param duration: Time for which the key it to be played.
         :return: None
         """
-        # diving t from 0 to duration in int(self._BITRATE * duration) divisions.
         key_hz = self.get_hz(key)
-        # making sure the wave ends at zero.
-        phase_completer = round(key_hz * 2 * duration)/(2*key_hz) - duration
-        t = np.linspace(0, duration + phase_completer, int(self._BITRATE * duration))
+        reciprocal_hz = 1 / key_hz
+        # making sure the wave ends and starts at maxima.
+        phase_completer = reciprocal_hz*(round(key_hz*duration) + 0.25) - duration
+        t = np.linspace(0.25*reciprocal_hz, duration + phase_completer, round(self._BITRATE * duration))
         # sinusoidal waves are a function of sine with args 2*pi*frequency*t.
         time = t + self.play_time
-        self.total_time = np.concatenate((self.total_time, t + self.play_time))
-        self.play_time += duration
+        wave = np.sin(2 * np.pi * key_hz * t)
+
         self.graphing_sample.append((key, time, wave))
 
         self.sample = np.concatenate((self.sample, wave))
         self.total_time = np.concatenate((self.total_time, time))
+        self.play_time += duration + phase_completer - 0.25*reciprocal_hz + 1/round(self._BITRATE * duration)
+
     def record_chord(self, chords: Iterable, duration: float) -> None:
         """
         Adds the given chords in the sample.
@@ -50,22 +52,33 @@ class Instrument:
         :param duration: Duration of each chord.
         """
         sinusoidal_superposition = np.empty((int(self._BITRATE * duration)))
+        max_phase_completer = 0
+        max_initial_deflection = 0
         for chord in chords:
             for key in chord:
                 key_hz = self.get_hz(key)
-                phase_completer = round(key_hz * 2 * duration)/(2*key_hz) - duration
-                t = np.linspace(0, duration + phase_completer, int(self._BITRATE * duration))
+                reciprocal_hz = 1 / key_hz
+                # making sure the wave ends and starts at maxima.
+                phase_completer = reciprocal_hz * (round(key_hz * duration) + 0.25) - duration
+                initial_deflection = 0.25*reciprocal_hz
+                t = np.linspace(initial_deflection, duration + phase_completer, int(self._BITRATE * duration))
                 sinusoidal_superposition += np.sin(2 * np.pi * key_hz * t)
+
+                if initial_deflection > max_initial_deflection:
+                    max_initial_deflection = initial_deflection
+                if phase_completer > max_phase_completer:
+                    max_phase_completer = phase_completer
 
         # keeping it in a range of [-1 , 1]
         sinusoidal_superposition = sinusoidal_superposition / sinusoidal_superposition.max()
+
+        t = np.linspace(max_initial_deflection, duration + max_phase_completer, int(self._BITRATE * duration))
         time = t+self.play_time
         self.graphing_sample.append((tuple(chords), time, sinusoidal_superposition))
         self.sample = np.concatenate((self.sample, sinusoidal_superposition))
 
         self.total_time = np.concatenate((self.total_time, time))
-        self.total_time = np.concatenate((self.total_time, t + self.play_time))
-        self.play_time += duration
+        self.play_time += duration + max_phase_completer - max_initial_deflection + 1/round(self._BITRATE * duration)
 
     def play(self) -> None:
         """
