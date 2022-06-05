@@ -52,7 +52,17 @@ Alternatively you can also plot the graph
 ```python
 import matplotlib.pyplot as plt
 
-plt.plot(piano.total_time, piano.sample)
+key_colors = {40: ["red", 1], 42: ["blue", 1], 44: ["green", 1], 45: ["gray", 1],
+                  47: ["orange", 1], 35: ["purple", 1], ((51, 56, 61),): ['black', 1]}
+
+# piano.graphing sample contains key, time take as an array, wave equation as an array.
+for key, time, wave in piano.graphing_sample:
+    if key_colors[key][1]:
+        plt.plot(time, wave, label=key, color=key_colors[key][0])
+        key_colors[key][1] = 0
+    else:
+        plt.plot(time, wave, color=key_colors[key][0])
+
 plt.show()
 ```
 Or the spectogram

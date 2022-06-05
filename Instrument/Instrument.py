@@ -10,6 +10,8 @@ class Instrument:
         self._player = pyaudio.PyAudio()
 
         self.sample = np.array([])
+        self.graphing_sample = []
+
         self.total_time = np.array([])
         self.play_time = 0
 
@@ -34,10 +36,13 @@ class Instrument:
         phase_completer = round(key_hz * 2 * duration)/(2*key_hz) - duration
         t = np.linspace(0, duration + phase_completer, int(self._BITRATE * duration))
         # sinusoidal waves are a function of sine with args 2*pi*frequency*t.
-        self.sample = np.concatenate((self.sample, np.sin(2 * np.pi * key_hz * t)))
+        time = t + self.play_time
         self.total_time = np.concatenate((self.total_time, t + self.play_time))
         self.play_time += duration
+        self.graphing_sample.append((key, time, wave))
 
+        self.sample = np.concatenate((self.sample, wave))
+        self.total_time = np.concatenate((self.total_time, time))
     def record_chord(self, chords: Iterable, duration: float) -> None:
         """
         Adds the given chords in the sample.
@@ -54,9 +59,11 @@ class Instrument:
 
         # keeping it in a range of [-1 , 1]
         sinusoidal_superposition = sinusoidal_superposition / sinusoidal_superposition.max()
+        time = t+self.play_time
+        self.graphing_sample.append((tuple(chords), time, sinusoidal_superposition))
         self.sample = np.concatenate((self.sample, sinusoidal_superposition))
 
-        t = np.linspace(0, duration, int(self._BITRATE * duration))
+        self.total_time = np.concatenate((self.total_time, time))
         self.total_time = np.concatenate((self.total_time, t + self.play_time))
         self.play_time += duration
 
