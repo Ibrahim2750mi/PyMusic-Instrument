@@ -1,13 +1,28 @@
 from collections.abc import Iterable
+import struct
+import sys
 
 import numpy as np
 import pyaudio
 
 
+class PlayerNotInitialisedError(AttributeError):
+    pass
+
+
 class Instrument:
-    def __init__(self, bit_rate: int = 44100):
+    def __init__(self, bit_rate: int = 44100, no_play: bool = False):
+        """
+        Can play any piano notes, you have to input the key number for corresponding frequencies.
+        :param bit_rate: Generally value of bit rate is 44100 or 48000,
+         it is proportional to wavelength of frequency generated.
+        :param no_play: Use this if you don't want to play the sample but use it for other purposes.
+        """
         self._BITRATE = bit_rate
-        self._player = pyaudio.PyAudio()
+        self.no_play = no_play
+
+        if not self.no_play:
+            self._player = pyaudio.PyAudio()
 
         self.sample = np.array([])
         self.graphing_sample = []
@@ -84,6 +99,8 @@ class Instrument:
         """
         Plays the sample.
         """
+        if self.no_play:
+            raise PlayerNotInitialisedError("Player not initialised")
         parsed_sample = self.sample.astype(np.float32)
         stream = self._player.open(format=pyaudio.paFloat32,
                                    channels=1,
@@ -100,7 +117,51 @@ class Instrument:
         """
         Terminates PyAudio.
         """
+        if self.no_play:
+            return
         self._player.terminate()
 
     def clear_sample(self) -> None:
+        """
+        Clears the sample.
+        """
         self.sample = np.array([])
+
+    def to_wav(self, path: str) -> None:
+        """
+        Convert the sample to wav file format.
+        :param path: Path of the file where it will be written.
+        """
+        # headers for wav format http://www.topherlee.com/software/pcm-tut-wavformat.html
+        header = b""
+        header += b'RIFF'
+        # Leaving an empty space which will be left at the end.
+        header += b'\x00\x00\x00\x00'
+        header += b'WAVE'
+        header += b"fmt "
+        sample = self.sample.astype(np.float32)
+
+        fmt_chunk = struct.pack("<HHIIHH", 3, 1, self._BITRATE, self._BITRATE*4, 4, 32)
+        fmt_chunk += b"\x00\x00"
+
+        header += struct.pack('<I', len(fmt_chunk))
+        header += fmt_chunk
+
+        # added this because it is a non-PCM file.
+        header += b'fact'
+        header += struct.pack('<II', 4, sample.shape[0])
+
+        file = open(path, "wb")
+        file.write(header)
+        file.write(b"data")
+        file.write(struct.pack('<I', sample.nbytes))
+
+        if sample.dtype.byteorder == '=' and sys.byteorder == 'big':
+            sample = sample.byteswap()
+
+        file.write(sample.tobytes())
+        # filling that empty space.
+        size = file.tell()
+        file.seek(4)
+        file.write(struct.pack('<I', size - 8))
+        file.close()
