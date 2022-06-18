@@ -79,3 +79,5 @@ plt.show()
 ```
 
 # Documentation
+
+https://pymusic-instrument.readthedocs.io/en/latest/
