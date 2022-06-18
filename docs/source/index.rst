@@ -7,7 +7,7 @@ Welcome to PyMusic-Instrument's documentation!
 ==============================================
 
 A python library which can generate sounds played by instruments mainly guitar and piano. It uses PyAudio as its
-dependency.
+dependency. By using this library you can play piano notes with python!
 
 .. note::
 

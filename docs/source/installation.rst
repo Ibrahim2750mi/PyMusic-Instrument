@@ -4,7 +4,7 @@ If in your machine previously you have never installed PyAudio then do this:
 
 Unix
 ~~~~~
-`sudo apt-get install libasound-dev portaudio19-dev libportaudio2 libportaudiocpp0`
+``sudo apt-get install libasound-dev portaudio19-dev libportaudio2 libportaudiocpp0``
 
 Windows
 ~~~~~~~~
