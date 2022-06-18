@@ -7,7 +7,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name='PyMusic-Instrument',
-    version='0.3',
+    version='0.4',
     long_description=README,
     long_description_content_type="text/markdown",
     description='A python library which can generate sounds played by instruments',

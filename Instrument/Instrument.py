@@ -7,24 +7,33 @@ import pyaudio
 
 
 class PlayerNotInitialisedError(AttributeError):
+    """
+    Test
+    """
     pass
 
 
 class Instrument:
+    """
+    Can play any piano notes, you have to input the key number for corresponding frequencies.
+
+    :param bit_rate: Generally value of bit rate is 44100 or 48000, it is proportional to wavelength of frequency generated.
+    :param no_play: Use this if you don't want to play the sample but use it for other purposes.
+
+    Attributes:
+        :graphing_sample: Used for graphing see the usage page.
+        :total_time: Numpy array representing time at split seconds.
+        :play_time: Total time for which the sample has been recorded.
+    """
     def __init__(self, bit_rate: int = 44100, no_play: bool = False):
-        """
-        Can play any piano notes, you have to input the key number for corresponding frequencies.
-        :param bit_rate: Generally value of bit rate is 44100 or 48000,
-         it is proportional to wavelength of frequency generated.
-        :param no_play: Use this if you don't want to play the sample but use it for other purposes.
-        """
+
         self._BITRATE = bit_rate
         self.no_play = no_play
 
         if not self.no_play:
             self._player = pyaudio.PyAudio()
 
-        self.sample = np.array([])
+        self._sample = np.array([])
         self.graphing_sample = []
 
         self.total_time = np.array([])
@@ -34,6 +43,7 @@ class Instrument:
     def get_hz(key_number: int) -> float:
         """
         Get frequency of the key via its key number.
+
         :return: frequency of the key.
         """
         return 2 ** ((key_number - 49) / 12) * 440
@@ -41,6 +51,7 @@ class Instrument:
     def record_key(self, key: int, duration: float) -> None:
         """
         Adds the key in the sample.
+
         :param key: The key number of the key's name.
         :param duration: Time for which the key it to be played.
         :return: None
@@ -63,6 +74,7 @@ class Instrument:
     def record_chord(self, chords: Iterable, duration: float) -> None:
         """
         Adds the given chords in the sample.
+
         :param chords: The iterable of chords that you want to play at same time.
         :param duration: Duration of each chord.
         """
@@ -125,11 +137,12 @@ class Instrument:
         """
         Clears the sample.
         """
-        self.sample = np.array([])
+        self._sample = np.array([])
 
     def to_wav(self, path: str) -> None:
         """
         Convert the sample to wav file format.
+
         :param path: Path of the file where it will be written.
         """
         # headers for wav format http://www.topherlee.com/software/pcm-tut-wavformat.html
@@ -165,3 +178,10 @@ class Instrument:
         file.seek(4)
         file.write(struct.pack('<I', size - 8))
         file.close()
+
+    @property
+    def sample(self):
+        """
+        Numpy array containing sample data.
+        """
+        return self._sample
